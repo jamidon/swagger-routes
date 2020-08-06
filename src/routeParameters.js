@@ -34,7 +34,6 @@ function formatGroupData(groupSchema, groupData, groupId, req) {
 }
 
 function parseCollectionFormat(paramSchema, value) {
-  console.log(paramSchema);
   if (paramSchema.type === 'array' && typeof value === 'string') {
     // convert the collection string into an array of items
     let values = stringValueToArray(value, paramSchema.collectionFormat || 'csv')
