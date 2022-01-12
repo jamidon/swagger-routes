@@ -154,11 +154,14 @@ function runStep(step, op, specInfo, options, acc) {
         console.log(msg)
       }
       return res
+    }, res => {
+      acc.push({ req, res })
+      return res
     })
     .then(
       res => validateResponse(req, res, step, op, options, acc),
       res => validateResponse(req, res, step, op, options, acc)
-  )
+    )
     .then(() => acc)
 }
 
@@ -324,7 +327,13 @@ function validateResponse(req, res, spec, op, options, acc) {
 
 function getResponseSpec(spec, acc, options) {
   if (typeof spec.response === 'object') {
-    return populateProperties(spec.response, acc, options)
+    // Don't attempt to parse properties if we didn't get the expected
+    // response as things will tend to blow up
+    if (spec.response.status === (acc[acc.length - 1] || { res: {} }).res.status) {
+      return populateProperties(spec.response, acc, options)
+    } else {
+      return spec.response
+    }
   } else {
     return { status: spec.response }
   }
@@ -356,6 +365,12 @@ function validateBody(res, bodySchema, responseSpec) {
     // Instead we capture all errors and then throw the first one found
     const result = jsonSchema.validate(res.data, bodySchema, { throwError: false })
     if (result && result.errors.length) {
+      const details = result.errors
+        .slice(1)
+        .map( e => `\n\t - ${e.property} - ${e.message}`)
+        .join('')
+
+      result.errors[0].message += details
       throw result.errors[0]
     }
   }

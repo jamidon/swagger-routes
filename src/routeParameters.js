@@ -24,7 +24,7 @@ function formatGroupData(groupSchema, groupData, groupId, req) {
     val = parseCollectionFormat(paramSchema, val)
     val = parseBoolean(paramSchema, val)
     val = parseNumber(paramSchema, val)
-    val = applyDefaultValue(paramSchema, val)
+    val = applyDefaultValue(paramSchema, val, name, req)
     origGroupData[name] = groupData[name] = val
     if (reqParams && reqParams[name] !== undefined) {
       reqParams[name] = val
@@ -96,8 +96,13 @@ function stringValueToArray(value, format) {
   return value.split(delimiter)
 }
 
-function applyDefaultValue(paramSchema, value) {
-  return (value === undefined && !paramSchema.required) ? paramSchema.default : value
+function applyDefaultValue(paramSchema, value, name, req) {
+  if (value === undefined && !paramSchema.required && paramSchema.default !== undefined) {
+    if (!req.appliedDefaults) req.appliedDefaults = {}
+    req.appliedDefaults[name] = true
+    return paramSchema.default
+  }
+  return value
 }
 
 function getPathParams(req, operation) {
@@ -114,8 +119,9 @@ function getPathParams(req, operation) {
   return operation.parameters
     .filter(op => op.in === 'path')
     .reduce((pathParams, op) => {
-      if (params[op.name] !== undefined) {
-        pathParams[op.name] = params[op.name]
+      const v = params[op.name]
+      if (v !== undefined && v !== '') {
+        pathParams[op.name] = v
       }
       return pathParams
     }, {})

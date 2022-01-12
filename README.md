@@ -43,6 +43,7 @@ server.listen(8080)
 
 - `api`: path to your Swagger spec, or the loaded spec reference.
 - `docsPath`: url path to serve your swagger api json. Defaults to `/api-docs`.
+- `docsMiddleware`: An optional middleware function that can be used to secure the api docs endpoint.
 - `handlers`: directory where your handler files reside. Defaults to `./handlers`. Can alternatively be a function to return a handler function given an operation.
 - `authorizers`: directory where your authorizer files reside. Defaults to `./security`. Can alternatively be a function to return an authorizer middleware given a swagger security scheme.
 - `maintainHeaders`: Keeps your generated handler doc headers in sync with your Swagger api. Default is false.
@@ -215,6 +216,23 @@ As you can see a `verifyScopes` function is supplied to the req if the security 
 It takes an array of scopes you decode from the authenticated request and verifies that the 
 required scope(s) defined be the scheme are present. If they're not a `403 Forbidden` 
 [error](https://en.wikipedia.org/wiki/HTTP_403#Difference_from_status_.22401_Unauthorized.22) is returned.
+
+When multiple oauth scopes are defined for the security of an endpoint, Swagger expects all of them to be 
+present for a call to proceed. As an extension to this, `swagger-routes` also supports the logical OR of 
+token scopes, so if *any* exist then `verifyScopes` succeeds.
+
+As an example, this definition below will pass the auth check if either a `Catalog` OR `Playback` scope exist.
+
+```yaml
+  ...
+  security:
+    - accountAuth:
+      - Catalog
+      - Playback
+  x-security:
+    accountAuth:
+      OR_scopes: true
+```
 
 Remember if no credentials are supplied a `401 Unauthorized` should be returned.
 
