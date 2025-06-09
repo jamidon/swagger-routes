@@ -41,7 +41,8 @@
     "js-yaml": "^3.5.4",
     "jsonschema": "1.1.0",
     "mkdirp": "^3.0.1",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "restify-errors": "^8.0.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",

@@ -109,18 +109,25 @@ function formatFailure(failure) {
   return failure
 }
 
+// extend restify-errors
+const restifyErrors = require('restify-errors');
+const ValidationError = restifyErrors.makeConstructor('ValidationError', {
+  statusCode: 400,
+  restCode: 'ValidationError'
+});
+
 function checkValidationResult(result) {
   if (!result || result.valid) return undefined
   const message = result.errors.map(e => e.message).join(', ')
   return new ValidationError(message)
 }
 
-class ValidationError extends Error {
-  constructor(message) {
-    super(message)
-    this.name = this.constructor.name
-    this.message = message
-    this.status = this.statusCode = 400
-    Error.captureStackTrace(this, this.constructor.name)
-  }
-}
+// class ValidationError extends Error {
+//   constructor(message) {
+//     super(message)
+//     this.name = this.constructor.name
+//     this.message = message
+//     this.status = this.statusCode = 400
+//     Error.captureStackTrace(this, this.constructor.name)
+//   }
+// }
