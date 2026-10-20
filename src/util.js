@@ -72,7 +72,7 @@ function readDir(dirPath) {
 
 function parseFileContents(contents, path) {
   return isYamlFile(path) ?
-    yaml.safeLoad(contents) :
+    yaml.load(contents) :
     JSON.parse(contents)
 }
 
